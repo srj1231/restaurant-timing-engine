@@ -1,6 +1,6 @@
 package com.saumya.lld.restaurant_timing_engine.entities.availability;
 
-import com.saumya.lld.restaurant_timing_engine.entities.OpeningSchedule;
+import com.saumya.lld.restaurant_timing_engine.entities.schedule.OpeningSchedule;
 import com.saumya.lld.restaurant_timing_engine.entities.Restaurant;
 import com.saumya.lld.restaurant_timing_engine.repository.RestaurantRepository;
 

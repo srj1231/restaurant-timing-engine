@@ -1,5 +1,6 @@
-package com.saumya.lld.restaurant_timing_engine.entities;
+package com.saumya.lld.restaurant_timing_engine.entities.schedule;
 
+import com.saumya.lld.restaurant_timing_engine.entities.TimeSlot;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
