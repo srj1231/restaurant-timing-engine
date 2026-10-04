@@ -1,6 +1,7 @@
 package com.saumya.lld.restaurant_timing_engine.entities.availability;
 
 import com.saumya.lld.restaurant_timing_engine.entities.*;
+import com.saumya.lld.restaurant_timing_engine.entities.schedule.OpeningSchedule;
 import com.saumya.lld.restaurant_timing_engine.repository.RestaurantRepository;
 
 import java.time.Instant;
@@ -21,18 +22,6 @@ public class InMemoryAvailabilityIndex implements AvailabilityIndex {
 
     // so updating slots is easier
     private final Map<String, Set<TimeBucket>> restaurantBuckets = new ConcurrentHashMap<>();
-
-    @Override
-    public Set<String> getOpenRestaurants(Instant instant) {
-        Set<String> openRestaurants = new HashSet<>();
-        Set<String> allRestaurants = new HashSet<>(restaurantBuckets.keySet());
-
-        for(String id : allRestaurants) {
-            // handled via timezone grouping
-            return openRestaurants; // todo
-        }
-        return openRestaurants;
-    }
 
     public Set<String> getOpenRestaurants(
             Instant instant,

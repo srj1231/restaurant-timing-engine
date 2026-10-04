@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface RestaurantRepository {
 
-    Restaurant get(String restaurantId);
+    Restaurant getById(String restaurantId);
 
     void save(Restaurant restaurant);
 

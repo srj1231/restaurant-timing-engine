@@ -12,7 +12,7 @@ public class InMemoryRestaurantRepository implements RestaurantRepository {
     private final Map<String, Restaurant> restaurants = new ConcurrentHashMap<>();
 
     @Override
-    public Restaurant get(String restaurantId) {
+    public Restaurant getById(String restaurantId) {
         return restaurants.get(restaurantId);
     }
 

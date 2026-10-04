@@ -1,9 +1,11 @@
 package com.saumya.lld.restaurant_timing_engine.service;
 
-import com.saumya.lld.restaurant_timing_engine.entities.OpeningSchedule;
+import com.saumya.lld.restaurant_timing_engine.entities.schedule.OpeningSchedule;
 import com.saumya.lld.restaurant_timing_engine.entities.Restaurant;
 import com.saumya.lld.restaurant_timing_engine.entities.TimeSlot;
 import com.saumya.lld.restaurant_timing_engine.entities.availability.AvailabilityIndex;
+import com.saumya.lld.restaurant_timing_engine.entities.schedule.RestaurantSchedule;
+import com.saumya.lld.restaurant_timing_engine.entities.schedule.ScheduleSnapshot;
 import com.saumya.lld.restaurant_timing_engine.repository.OpeningHoursRepository;
 import com.saumya.lld.restaurant_timing_engine.repository.RestaurantRepository;
 import lombok.AllArgsConstructor;
@@ -24,13 +26,13 @@ public class RestaurantAvailabilityService {
 
     // read 1: get a restaurant's opening hours
     public List<TimeSlot> getOpeningHours(String restaurantId) {
-        OpeningSchedule openingSchedule = openingHoursRepository.get(restaurantId);
+        RestaurantSchedule schedule = openingHoursRepository.getSchedule(restaurantId);
 
-        if(openingSchedule == null){
+        if(schedule == null){
             throw new IllegalArgumentException("Schedule not found for restaurant " + restaurantId);
         }
 
-        return openingSchedule.getSlots();
+        return schedule.getSnapshot().getSlots();
     }
 
     // read 2: get all restaurants open at a given time
@@ -39,7 +41,7 @@ public class RestaurantAvailabilityService {
         List<Restaurant> openRestaurants = new ArrayList<>();
 
         for(String id : ids){
-            Restaurant restaurant = restaurantRepository.get(id);
+            Restaurant restaurant = restaurantRepository.getById(id);
 
             if(restaurant != null) openRestaurants.add(restaurant);
         }
@@ -47,18 +49,36 @@ public class RestaurantAvailabilityService {
         return openRestaurants;
     }
 
-    // write: update opening hours
+    // write: update opening hours with optimistic concurrency
     public void updateOpeningHours(String restaurantId, List<TimeSlot> slots) {
-        Restaurant restaurant = restaurantRepository.get(restaurantId);
+        Restaurant restaurant = restaurantRepository.getById(restaurantId);
 
         if (restaurant == null) {
             throw new IllegalArgumentException("Restaurant does not exist");
         }
 
-        OpeningSchedule schedule = new OpeningSchedule(restaurantId, slots);
-
-        openingHoursRepository.save(schedule); // source of truth
-
-        availabilityIndex.update(restaurant, schedule); // Read optimized index
+        RestaurantSchedule schedule = openingHoursRepository.getSchedule(restaurantId);
+        
+        // Retry loop for optimistic concurrency
+        while (true) {
+            ScheduleSnapshot current = schedule.getSnapshot();
+            long newVersion = current.getVersion() + 1;
+            
+            // Update index first (read path uses index)
+            OpeningSchedule openingSchedule = new OpeningSchedule(restaurantId, slots);
+            availabilityIndex.update(restaurant, openingSchedule);
+            
+            // Try to update schedule atomically
+            boolean success = schedule.update(newVersion, slots);
+            
+            if (success) {
+                // Save to source of truth (for persistence)
+                openingHoursRepository.saveSchedule(schedule);
+                break;
+            }
+            
+            // Version mismatch - rollback index and retry
+            availabilityIndex.removeRestaurant(restaurant);
+        }
     }
 }
