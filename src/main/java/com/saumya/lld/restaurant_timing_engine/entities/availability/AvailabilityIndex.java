@@ -9,8 +9,6 @@ import java.util.Set;
 
 public interface AvailabilityIndex {
 
-    Set<String> getOpenRestaurants(Instant instant);
-
     Set<String> getOpenRestaurants(Instant instant, RestaurantRepository restaurantRepository);
 
     void update(Restaurant restaurant, OpeningSchedule openingSchedule);

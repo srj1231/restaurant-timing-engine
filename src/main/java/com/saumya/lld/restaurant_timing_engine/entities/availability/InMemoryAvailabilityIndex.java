@@ -22,18 +22,6 @@ public class InMemoryAvailabilityIndex implements AvailabilityIndex {
     // so updating slots is easier
     private final Map<String, Set<TimeBucket>> restaurantBuckets = new ConcurrentHashMap<>();
 
-    @Override
-    public Set<String> getOpenRestaurants(Instant instant) {
-        Set<String> openRestaurants = new HashSet<>();
-        Set<String> allRestaurants = new HashSet<>(restaurantBuckets.keySet());
-
-        for(String id : allRestaurants) {
-            // handled via timezone grouping
-            return openRestaurants; // todo
-        }
-        return openRestaurants;
-    }
-
     public Set<String> getOpenRestaurants(
             Instant instant,
             RestaurantRepository restaurantRepository

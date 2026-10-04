@@ -39,7 +39,7 @@ public class RestaurantAvailabilityService {
         List<Restaurant> openRestaurants = new ArrayList<>();
 
         for(String id : ids){
-            Restaurant restaurant = restaurantRepository.get(id);
+            Restaurant restaurant = restaurantRepository.getById(id);
 
             if(restaurant != null) openRestaurants.add(restaurant);
         }
@@ -49,7 +49,7 @@ public class RestaurantAvailabilityService {
 
     // write: update opening hours
     public void updateOpeningHours(String restaurantId, List<TimeSlot> slots) {
-        Restaurant restaurant = restaurantRepository.get(restaurantId);
+        Restaurant restaurant = restaurantRepository.getById(restaurantId);
 
         if (restaurant == null) {
             throw new IllegalArgumentException("Restaurant does not exist");
